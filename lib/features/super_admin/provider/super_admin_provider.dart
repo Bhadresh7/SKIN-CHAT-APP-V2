@@ -82,12 +82,15 @@ class SuperAdminProvider with ChangeNotifier {
   }
 
   /// Block users (legacy method using UID)
-  Future<String> blockUsers({required String uid}) async {
+  Future<String> blockUsers({
+    required String uid,
+    required bool doBlock,
+  }) async {
     try {
       _isBlockLoading = true;
       notifyListeners();
 
-      final status = await _service.blockUsers(uid: uid);
+      final status = await _service.blockUsers(uid: uid, doBlock: doBlock);
       print("🔄 Block toggle result: $status");
       await getAllUsers(email: viewUsers?.email ?? '');
 

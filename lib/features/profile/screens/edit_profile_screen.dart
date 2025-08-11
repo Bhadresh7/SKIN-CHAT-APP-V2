@@ -198,17 +198,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             },
                           ),
                         ),
-                        Positioned(
-                          top: -0,
-                          left: (MediaQuery.of(context).size.width / 2) + 20,
-                          // right: -10,
-                          child: GestureDetector(
-                            onTap: () async {
-                              await imagePickerProvider.pickProfileImage();
-                            },
-                            child: CircleAvatar(child: Icon(Icons.edit)),
-                          ),
-                        ),
+                        isUpdating
+                            ? SizedBox()
+                            : Positioned(
+                                top: -0,
+                                left:
+                                    (MediaQuery.of(context).size.width / 2) +
+                                    20,
+                                // right: -10,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    await imagePickerProvider
+                                        .pickProfileImage();
+                                  },
+                                  child: CircleAvatar(child: Icon(Icons.edit)),
+                                ),
+                              ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -216,6 +221,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: usernameController,
                       name: 'name',
                       hintText: 'username',
+                      readOnly: isUpdating,
                       validators: [FormBuilderValidators.required()],
                     ),
                     const SizedBox(height: 20),
@@ -224,12 +230,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       keyboardType: TextInputType.phone,
                       maxLength: 10,
                       name: '',
+                      readOnly: isUpdating,
+
                       hintText: '',
                       validators: [],
                     ),
                     const SizedBox(height: 20),
 
-                    DateInputField(controller: dateController),
+                    DateInputField(
+                      controller: dateController,
+                      readOnly: isUpdating,
+                    ),
                     const SizedBox(height: 30),
                     isUpdating
                         ? Center(child: CircularProgressIndicator())

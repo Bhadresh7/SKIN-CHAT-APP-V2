@@ -96,6 +96,7 @@ class MyAuthProvider extends ChangeNotifier {
   }
 
   void initialize(context) async {
+    AppLoggerHelper.logInfo("Initializing app 0%");
     _setLoadingState(true);
     notifyListeners();
 
@@ -103,6 +104,7 @@ class MyAuthProvider extends ChangeNotifier {
       // Get current user without network call first
       await LocalDBService().init();
       user = FirebaseAuth.instance.currentUser;
+      AppLoggerHelper.logInfo("Initializing app 10%");
 
       if (user != null) {
         try {
@@ -110,6 +112,7 @@ class MyAuthProvider extends ChangeNotifier {
           await user!.reload();
           // Update user reference after reload
           user = FirebaseAuth.instance.currentUser;
+
           print("User reloaded successfully");
         } catch (e) {
           print("Network error during user reload: $e");
@@ -117,34 +120,50 @@ class MyAuthProvider extends ChangeNotifier {
           print("Continuing with cached user data");
         }
       }
+      AppLoggerHelper.logInfo("Initializing app 20%");
 
       print("Current user: $user");
 
       if (user == null) {
+        AppLoggerHelper.logInfo("Initializing app 100%");
+
         AppRouter.replace(context, AuthLoginScreen());
       } else if (!(user!.emailVerified)) {
         // Check email verification with network fallback
+        AppLoggerHelper.logInfo("Initializing app 30%");
+
         try {
           await user!.reload();
           user = FirebaseAuth.instance.currentUser;
           if (!(user!.emailVerified)) {
+            AppLoggerHelper.logInfo("Initializing app 100%");
+
             AppRouter.replace(context, EmailVerificationScreen());
           } else {
             // Email was verified, continue to next step
+            AppLoggerHelper.logInfo("Initializing app 40%");
+            AppLoggerHelper.logInfo("Initializing app 50%");
+
             await _proceedToUserDataCheck(context);
           }
         } catch (e) {
           print("Network error checking email verification: $e");
           // If network fails, assume email needs verification based on cached state
+          AppLoggerHelper.logInfo("Initializing app 100%");
+
           AppRouter.replace(context, EmailVerificationScreen());
         }
       } else {
+        AppLoggerHelper.logInfo("Initializing app 40%");
+
         ChatProvider chatProvider = Provider.of<ChatProvider>(
           context,
           listen: false,
         );
         chatProvider.initializeSharingIntent(context);
         chatProvider.initIntentHandling();
+        AppLoggerHelper.logInfo("Initializing app 50%");
+
         await _proceedToUserDataCheck(context);
       }
     } catch (e) {
@@ -165,6 +184,7 @@ class MyAuthProvider extends ChangeNotifier {
           .collection('users')
           .doc(user!.uid)
           .get();
+      AppLoggerHelper.logInfo("Initializing app 60%");
 
       if (!tempData.exists) {
         print("User data does not exist");
@@ -176,10 +196,13 @@ class MyAuthProvider extends ChangeNotifier {
 
         // Start listening to real-time updates
         _startUserDataListener();
+        AppLoggerHelper.logInfo("Initializing app 70%");
 
         if (!(userData!.isGoogle)! &&
             (userData!.imageUrl) == null &&
             !(userData!.isImgSkipped)) {
+          AppLoggerHelper.logInfo("Initializing app 100%");
+
           AppRouter.replace(context, ImageSetupScreen());
         } else {
           // Initialize chat provider only after successful auth
@@ -188,13 +211,18 @@ class MyAuthProvider extends ChangeNotifier {
               context,
               listen: false,
             );
+            AppLoggerHelper.logInfo("Initializing app 80%");
 
             await chatProvider.loadMessages();
             chatProvider.startFirestoreListener();
+            AppLoggerHelper.logInfo("Initializing app 90%");
+
             await chatProvider.syncNewMessagesFromFirestore();
           } catch (e) {
             print("Error initializing chat provider: $e");
           }
+          AppLoggerHelper.logInfo("Initializing app 100%");
+
           AppRouter.replace(context, ChatScreen());
         }
       }

@@ -54,9 +54,15 @@ class _MessageTextFieldState extends State<MessageTextField> {
     if (widget.messageController.text.trim().isEmpty) return;
 
     final chatProvider = context.read<ChatProvider>();
-
     final rawMessage = ChatMessageModel(
-      metadata: MetaModel(text: widget.messageController.text.trim()),
+      metadata: MetaModel(
+        text: extractFirstUrl(widget.messageController.text.trim())!.isEmpty
+            ? widget.messageController.text.trim()
+            : null,
+        url: extractFirstUrl(widget.messageController.text.trim())!.isEmpty
+            ? null
+            : widget.messageController.text.trim(),
+      ),
       senderId: context.readAuthProvider.user?.uid ?? 'unknown',
       createdAt: DateTime.now().millisecondsSinceEpoch,
       name:
@@ -65,6 +71,7 @@ class _MessageTextFieldState extends State<MessageTextField> {
           'Unknown',
       messageId: '',
     );
+
     widget.messageController.clear();
     _updateMaxLines();
     await chatProvider.sendMessage(rawMessage);

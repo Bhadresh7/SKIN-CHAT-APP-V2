@@ -16,6 +16,7 @@ class KCustomInputField extends StatefulWidget {
   final int? maxLength;
   final ValueChanged<String?>? onChanged;
   final bool showPrefix;
+  final bool readOnly;
 
   const KCustomInputField({
     super.key,
@@ -30,6 +31,7 @@ class KCustomInputField extends StatefulWidget {
     this.initialValue,
     this.showPrefix = false,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
+    this.readOnly = false,
   });
 
   @override
@@ -53,6 +55,7 @@ class _KCustomInputFieldState extends State<KCustomInputField> {
         autocorrect: widget.isPassword ? false : true,
         maxLength: widget.maxLength,
         name: widget.name,
+        readOnly: widget.readOnly,
         initialValue: widget.initialValue,
         autovalidateMode: widget.autovalidateMode,
         controller: widget.controller,

@@ -55,7 +55,7 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
           );
         }
 
-        final user = adminProvider.viewUsers;
+        final userData = adminProvider.viewUsers;
 
         return KBackgroundScaffold(
           appBar: AppBar(),
@@ -65,7 +65,7 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
               spacing: 0.03.sh,
               children: [
                 Center(
-                  child: (user?.img == null || user!.img!.isEmpty)
+                  child: (userData?.img == null || userData!.img!.isEmpty)
                       ? SvgPicture.asset(
                           AppAssets.profile,
                           height: 0.2.sh,
@@ -73,7 +73,7 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                         )
                       : ClipOval(
                           child: CachedNetworkImage(
-                            imageUrl: user.img ?? "",
+                            imageUrl: userData.img ?? "",
                             height: 0.20.sh,
                             width: 0.20.sh,
                             fit: BoxFit.cover,
@@ -104,15 +104,15 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildDetailRow('Name', user?.name),
-                        _buildDetailRow('Email', user?.email),
-                        _buildDetailRow('Mobile No', user?.mobileNumber),
-                        _buildDetailRow('DOB', user?.dob),
+                        _buildDetailRow('Name', userData?.name),
+                        _buildDetailRow('Email', userData?.email),
+                        _buildDetailRow('Mobile No', userData?.mobileNumber),
+                        _buildDetailRow('DOB', userData?.dob),
                       ],
                     ),
                   ),
                 ),
-                if (user?.canPost == true)
+                if (userData?.canPost == true)
                   KCustomButton(
                     isLoading: adminProvider.isAdminLoading,
                     text: "Revoke Permission",
@@ -141,8 +141,8 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                     color: Colors.orange,
                     prefixWidget: Icon(Icons.remove_circle_outline),
                   )
-                else if (user?.role == AppStatus.kAdmin &&
-                    !(user?.canPost ?? true))
+                else if (userData?.role == AppStatus.kAdmin &&
+                    !(userData?.canPost ?? true))
                   KCustomButton(
                     isLoading: adminProvider.isAdminLoading,
                     text: "Make as Admin",
@@ -173,17 +173,20 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                   ),
                 KCustomButton(
                   isLoading: adminProvider.isBlockLoading,
-                  text: user?.isBlocked == true ? "Unblock User" : "Block User",
+                  text: userData?.isBlocked == true
+                      ? "Unblock User"
+                      : "Block User",
                   onPressed: () async {
                     final result = await adminProvider.blockUsers(
-                      uid: user!.uid,
+                      uid: userData!.uid,
+                      doBlock: !(userData.isBlocked),
                     );
-
+                    // print(userData.isBlocked);
                     switch (result) {
                       case AppStatus.kSuccess:
                         return ToastHelper.showSuccessToast(
                           context: context,
-                          message: user.isBlocked
+                          message: (userData.isBlocked)
                               ? "User is Unblocked"
                               : "User is Blocked",
                         );
@@ -199,11 +202,11 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                         );
                     }
                   },
-                  color: user?.isBlocked == true
+                  color: userData?.isBlocked == true
                       ? Colors.green[900]
                       : AppStyles.danger,
                   prefixWidget: Icon(
-                    user?.isBlocked == true
+                    userData?.isBlocked == true
                         ? Icons.lock_open
                         : Icons.block_flipped,
                   ),

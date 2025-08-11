@@ -60,7 +60,16 @@ class ChatProvider extends ChangeNotifier {
 
               ///Handling shared text here
               if (files.first.type == SharedMediaType.TEXT) {
-                messageController.text = files.first.value!;
+                final textValue = files.first.value! ?? "";
+                if (textValue.isNotEmpty) {
+                  messageController.text = textValue;
+                  if (_isValidUrl(textValue)) {
+                    AppLoggerHelper.logInfo(
+                      'Detected URL, fetching metadata...',
+                    );
+                    fetchLinkMetadata(textValue);
+                  }
+                }
               }
               ///setting a shared image here handled in chatscreen
               else if (files.first.type == SharedMediaType.IMAGE) {
@@ -208,10 +217,10 @@ class ChatProvider extends ChangeNotifier {
 
           notifyListeners();
 
-          if (_isValidUrl(sharedIntentText!)) {
-            AppLoggerHelper.logInfo('Valid URL detected, fetching metadata...');
-            fetchLinkMetadata(sharedIntentText!);
-          }
+          // if (_isValidUrl(sharedIntentText!)) {
+          //   AppLoggerHelper.logInfo('Valid URL detected, fetching metadata...');
+          //   fetchLinkMetadata(sharedIntentText!);
+          // }
         }
       }
     } catch (e) {
@@ -234,6 +243,7 @@ class ChatProvider extends ChangeNotifier {
   Future<void> fetchLinkMetadata(String url) async {
     try {
       AppLoggerHelper.logInfo('Fetching metadata for URL: $url');
+
       _isLoadingMetadata = true;
       notifyListeners();
 

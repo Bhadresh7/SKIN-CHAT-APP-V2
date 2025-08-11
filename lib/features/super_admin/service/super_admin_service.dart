@@ -58,13 +58,16 @@ class SuperAdminService {
   }
 
   /// Block users by UID (legacy method - sets isBlocked to true and deletes token)
-  Future<String> blockUsers({required String uid}) async {
+  Future<String> blockUsers({
+    required String uid,
+    required bool doBlock,
+  }) async {
     try {
       await _firestore.collection(AppDb.kUserCollection).doc(uid).update({
-        'isBlocked': true,
+        'isBlocked': doBlock,
       });
 
-      await _firestore.collection('tokens').doc(uid).delete();
+      // await _firestore.collection('tokens').doc(uid).delete();
       return AppStatus.kSuccess;
     } catch (e) {
       print("❌ Error blocking user: $e");

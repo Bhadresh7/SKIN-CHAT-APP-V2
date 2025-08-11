@@ -42,11 +42,13 @@ class _ChatBubbleState extends State<ChatBubble> {
         });
 
     if (isUrl) {
+      print("isURl");
       MetadataFetch.extract(widget.chatMessage.metadata!.url!).then((value) {
         if (mounted && value != null) {
           setState(() {
             metadata = value;
           });
+          print(metadata);
         }
       });
     }

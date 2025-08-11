@@ -106,62 +106,67 @@ class _UserListViewState extends State<UserListView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.all(16.r),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.person, color: AppStyles.primary),
-              title: Text("View User Details"),
-              onTap: () {
-                Navigator.pop(context);
-                AppRouter.to(context, SpecificUserDetailsScreen(email: email));
-              },
-            ),
-            if (!isBlocked && role == "admin") ...[
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.person, color: AppStyles.primary),
+                title: Text("View User Details"),
+                onTap: () {
+                  Navigator.pop(context);
+                  AppRouter.to(
+                    context,
+                    SpecificUserDetailsScreen(email: email),
+                  );
+                },
+              ),
+              if (!isBlocked && role == "admin") ...[
+                Divider(),
+                ListTile(
+                  leading: Icon(
+                    canPost ? Icons.cancel : Icons.check_circle,
+                    color: canPost ? AppStyles.danger : AppStyles.green,
+                  ),
+                  title: Text(
+                    canPost ? "Revoke Posting Access" : "Grant Posting Access",
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmAction(
+                      context,
+                      canPost ? "Revoke Access" : "Grant Access",
+                      "Are you sure you want to ${canPost ? 'revoke' : 'grant'} posting access for $userName?",
+                      () {
+                        provider.togglePostingAccess(userId, !canPost);
+                      },
+                    );
+                  },
+                ),
+              ],
               Divider(),
               ListTile(
                 leading: Icon(
-                  canPost ? Icons.cancel : Icons.check_circle,
-                  color: canPost ? AppStyles.danger : AppStyles.green,
+                  isBlocked ? Icons.lock_open : Icons.block,
+                  color: isBlocked ? Colors.green : Colors.red,
                 ),
-                title: Text(
-                  canPost ? "Revoke Posting Access" : "Grant Posting Access",
-                ),
+                title: Text(isBlocked ? "Unblock User" : "Block User"),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmAction(
                     context,
-                    canPost ? "Revoke Access" : "Grant Access",
-                    "Are you sure you want to ${canPost ? 'revoke' : 'grant'} posting access for $userName?",
+                    isBlocked ? "Unblock User" : "Block User",
+                    "Are you sure you want to ${isBlocked ? 'unblock' : 'block'} $userName?",
                     () {
-                      provider.togglePostingAccess(userId, !canPost);
+                      provider.toggleBlockStatus(userId, !isBlocked);
                     },
                   );
                 },
               ),
             ],
-            Divider(),
-            ListTile(
-              leading: Icon(
-                isBlocked ? Icons.lock_open : Icons.block,
-                color: isBlocked ? Colors.green : Colors.red,
-              ),
-              title: Text(isBlocked ? "Unblock User" : "Block User"),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmAction(
-                  context,
-                  isBlocked ? "Unblock User" : "Block User",
-                  "Are you sure you want to ${isBlocked ? 'unblock' : 'block'} $userName?",
-                  () {
-                    provider.toggleBlockStatus(userId, !isBlocked);
-                  },
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -174,140 +174,120 @@ class _ChatScreenState extends State<ChatScreen> {
             loading: context.readAuthProvider.isLoading,
             margin: const EdgeInsets.all(0),
             showDrawer: true,
-            appBar: AppBar(
-              backgroundColor: AppStyles.primary,
-              iconTheme: IconThemeData(color: AppStyles.smoke, size: 32),
-              toolbarHeight: 0.09.sh,
-              title: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 0.03.sh,
-                    child: Image.asset(AppAssets.logo),
+            appBar: (context.readAuthProvider.userData!.isBlocked)
+                ? null
+                : AppBar(
+                    backgroundColor: AppStyles.primary,
+                    iconTheme: IconThemeData(color: AppStyles.smoke, size: 32),
+                    toolbarHeight: 0.09.sh,
+                    title: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        CircleAvatar(
+                          radius: 0.03.sh,
+                          child: Image.asset(AppAssets.logo),
+                        ),
+                        SizedBox(width: 0.02.sw),
+                        StreamBuilder<Map<String, dynamic>>(
+                          stream: context
+                              .readSuperAdminProvider
+                              .userAndAdminCountStream,
+                          builder: (context, snapshot) {
+                            final employeeCount = snapshot.data?["admin"] ?? 0;
+                            final candidateCount = snapshot.data?["user"] ?? 0;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "S.K.I.N. App",
+                                  style: TextStyle(color: AppStyles.smoke),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Employer: ${employeeCount.toString()}",
+                                      style: TextStyle(
+                                        fontSize: AppStyles.bodyText,
+                                        color: AppStyles.smoke,
+                                      ),
+                                    ),
+                                    SizedBox(width: 0.02.sw),
+                                    Text(
+                                      "Candidate: ${candidateCount.toString()}",
+                                      style: TextStyle(
+                                        fontSize: AppStyles.bodyText,
+                                        color: AppStyles.smoke,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 0.02.sw),
-                  StreamBuilder<Map<String, dynamic>>(
-                    stream:
-                        context.readSuperAdminProvider.userAndAdminCountStream,
-                    builder: (context, snapshot) {
-                      final employeeCount = snapshot.data?["admin"] ?? 0;
-                      final candidateCount = snapshot.data?["user"] ?? 0;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            body: SafeArea(
+              child: myAuthProvider.userData!.isBlocked
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Icon(Icons.block, color: Colors.red, size: 48),
+                          SizedBox(height: 16),
                           Text(
-                            "S.K.I.N. App",
-                            style: TextStyle(color: AppStyles.smoke),
+                            "Account Blocked",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                "Employer: ${employeeCount.toString()}",
-                                style: TextStyle(
-                                  fontSize: AppStyles.bodyText,
-                                  color: AppStyles.smoke,
+                          Text(
+                            "Your account has been blocked and you cannot access the chat. Please contact support for more information.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await myAuthProvider.signOut(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              SizedBox(width: 0.02.sw),
-                              Text(
-                                "Candidate: ${candidateCount.toString()}",
-                                style: TextStyle(
-                                  fontSize: AppStyles.bodyText,
-                                  color: AppStyles.smoke,
-                                ),
-                              ),
-                            ],
+                              child: Text("OK"),
+                            ),
                           ),
                         ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            body: myAuthProvider.userData!.isBlocked
-                ? Column(
-                    children: [
-                      Icon(Icons.block, color: Colors.red, size: 48),
-                      SizedBox(height: 16),
-                      Text(
-                        "Account Blocked",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                        textAlign: TextAlign.center,
                       ),
-                      Text(
-                        "Your account has been blocked and you cannot access the chat. Please contact support for more information.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await myAuthProvider.signOut(context);
+                    )
+                  : Column(
+                      children: [
+                        Expanded(child: _buildMessagesList()),
+                        Consumer<MyAuthProvider>(
+                          builder: (context, authProvider, child) {
+                            return !(authProvider.userData?.canPost ?? false)
+                                ? SizedBox(height: 0.050.sh)
+                                : MessageTextField(
+                                    messageController:
+                                        chatProvider.messageController,
+                                  );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text("OK"),
                         ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      // if (chatProvider.imageMetadata != null)
-                      // Container(
-                      //   width: double.infinity,
-                      //   padding: const EdgeInsets.all(12),
-                      //   margin: const EdgeInsets.all(8),
-                      //   decoration: BoxDecoration(
-                      //     color: Theme.of(
-                      //       context,
-                      //     ).colorScheme.surfaceContainerHighest,
-                      //     borderRadius: BorderRadius.circular(8),
-                      //   ),
-                      //   child: Row(
-                      //     children: [
-                      //       Expanded(
-                      //         child: Text(
-                      //           'Shared: ${chatProvider.imageMetadata}',
-                      //           style: Theme.of(context).textTheme.bodySmall,
-                      //           maxLines: 1,
-                      //           overflow: TextOverflow.ellipsis,
-                      //         ),
-                      //       ),
-                      //       IconButton(
-                      //         onPressed: chatProvider.clearMetadata,
-                      //         icon: const Icon(Icons.close, size: 16),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      Expanded(child: _buildMessagesList()),
-                      Consumer<MyAuthProvider>(
-                        builder: (context, authProvider, child) {
-                          return !(authProvider.userData?.canPost ?? false)
-                              ? SizedBox(height: 0.050.sh)
-                              : MessageTextField(
-                                  messageController:
-                                      chatProvider.messageController,
-                                );
-                        },
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+            ),
           );
         },
       ),

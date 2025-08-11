@@ -67,23 +67,26 @@ class _BackgroundScaffoldState extends State<KBackgroundScaffold> {
                               child: CircleAvatar(
                                 radius: 0.3.sw,
                                 backgroundImage:
-                                    context.readAuthProvider.userData!.isGoogle!
-                                    ? NetworkImage(
-                                        context
+                                    context
                                             .readAuthProvider
-                                            .user!
-                                            .photoURL!,
-                                      )
-                                    : context
-                                              .readAuthProvider
-                                              .userData!
-                                              .imageUrl !=
-                                          null
+                                            .userData!
+                                            .imageUrl !=
+                                        null
                                     ? NetworkImage(
                                         context
                                             .readAuthProvider
                                             .userData!
                                             .imageUrl!,
+                                      )
+                                    : context
+                                          .readAuthProvider
+                                          .userData!
+                                          .isGoogle!
+                                    ? NetworkImage(
+                                        context
+                                            .readAuthProvider
+                                            .user!
+                                            .photoURL!,
                                       )
                                     : AssetImage(AppAssets.profileImage),
                               ),
@@ -265,6 +268,7 @@ class _BackgroundScaffoldState extends State<KBackgroundScaffold> {
               child: widget.body,
             ),
           ),
+
           if (widget.loading)
             Positioned(
               child: Stack(

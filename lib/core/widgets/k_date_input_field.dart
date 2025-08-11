@@ -11,10 +11,12 @@ class DateInputField extends StatefulWidget {
     super.key,
     required this.controller,
     this.initialValue,
+    this.readOnly = false,
   });
 
   final TextEditingController controller;
   final DateTime? initialValue;
+  final bool readOnly;
 
   @override
   State<DateInputField> createState() => _DateInputFieldState();
@@ -32,6 +34,7 @@ class _DateInputFieldState extends State<DateInputField> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppStyles.hMargin),
       child: FormBuilderDateTimePicker(
+        disablePicker: widget.readOnly,
         onChanged: (value) {
           if (value != null) {
             widget.controller.text = DateFormat("dd/MM/yyyy").format(value);
