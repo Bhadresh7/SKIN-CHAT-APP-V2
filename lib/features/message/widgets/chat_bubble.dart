@@ -55,7 +55,9 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   bool get isImage => widget.chatMessage.metadata?.img != null;
+
   bool get isUrl => widget.chatMessage.metadata?.url != null;
+
   bool get isSender =>
       widget.chatMessage.senderId == context.readAuthProvider.user!.uid;
 
@@ -170,7 +172,9 @@ class _ChatBubbleState extends State<ChatBubble> {
             ),
         ],
       );
-    } else if (isUrl && metadata != null) {
+    } else if (isUrl &&
+        metadata != null &&
+        widget.chatMessage.metadata!.text != null) {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -215,16 +219,31 @@ class _ChatBubbleState extends State<ChatBubble> {
                   debugPrint("Cannot launch URL");
                 }
               },
-              child: Text(
-                widget.chatMessage.metadata!.url!,
-                style: TextStyle(
-                  color: AppStyles.links,
-                  fontSize: 12,
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppStyles.links,
-                  wordSpacing: 2.0,
-                  height: 1.5,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 0.02.sh,
+                children: [
+                  Text(
+                    widget.chatMessage.metadata!.url!,
+                    style: TextStyle(
+                      color: AppStyles.links,
+                      fontSize: 12,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppStyles.links,
+                      wordSpacing: 2.0,
+                      height: 1.5,
+                    ),
+                  ),
+                  Text(
+                    widget.chatMessage.metadata!.text!,
+                    style: TextStyle(
+                      color: AppStyles.smoke,
+                      fontSize: 12,
+                      wordSpacing: 2.0,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

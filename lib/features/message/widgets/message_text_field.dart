@@ -51,30 +51,52 @@ class _MessageTextFieldState extends State<MessageTextField> {
   }
 
   void _sendMessage() async {
-    if (widget.messageController.text.trim().isEmpty) return;
+    final messageText = widget.messageController.text.trim();
+    if (messageText.isEmpty) return;
 
-    final chatProvider = context.read<ChatProvider>();
-    final rawMessage = ChatMessageModel(
-      metadata: MetaModel(
-        text: extractFirstUrl(widget.messageController.text.trim())!.isEmpty
-            ? widget.messageController.text.trim()
-            : null,
-        url: extractFirstUrl(widget.messageController.text.trim())!.isEmpty
-            ? null
-            : widget.messageController.text.trim(),
-      ),
-      senderId: context.readAuthProvider.user?.uid ?? 'unknown',
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      name:
-          context.readAuthProvider.userData?.username ??
-          context.readAuthProvider.user?.displayName ??
-          'Unknown',
-      messageId: '',
-    );
+    try {
+      final chatProvider = context.read<ChatProvider>();
+      final extractedUrl = extractFirstUrl(messageText);
+      final hasUrl = extractedUrl != null && extractedUrl.isNotEmpty;
 
-    widget.messageController.clear();
-    _updateMaxLines();
-    await chatProvider.sendMessage(rawMessage);
+      // Extract remaining text after removing the URL
+      String? remainingText;
+      if (hasUrl) {
+        remainingText = messageText.replaceFirst(extractedUrl, '').trim();
+        if (remainingText.isEmpty) remainingText = null;
+      } else {
+        remainingText = messageText;
+      }
+
+      final rawMessage = ChatMessageModel(
+        metadata: MetaModel(
+          text: remainingText,
+          url: hasUrl ? extractedUrl : null,
+        ),
+        senderId: context.readAuthProvider.user?.uid ?? 'unknown',
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        name:
+            context.readAuthProvider.userData?.username ??
+            context.readAuthProvider.user?.displayName ??
+            'Unknown',
+        messageId: '',
+      );
+
+      widget.messageController.clear();
+      _updateMaxLines();
+
+      await chatProvider.sendMessage(rawMessage);
+    } catch (e) {
+      debugPrint('❌ Error sending message: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to send message. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   @override
