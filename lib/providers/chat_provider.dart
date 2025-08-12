@@ -43,7 +43,7 @@ class ChatProvider extends ChangeNotifier {
 
   // ==== SHARING INTENT HANDLING ====
 
-  void initializeSharingIntent(BuildContext context) {
+  void initializeSharingIntent() {
     try {
       AppLoggerHelper.logInfo('Initializing sharing intent...');
 
@@ -369,6 +369,7 @@ class ChatProvider extends ChangeNotifier {
                 );
 
                 final localMessages = await localDBService.getAllMessages();
+
                 final lastLocalTimestamp = localMessages.isNotEmpty
                     ? localMessages.map((m) => m.createdAt).reduce(max)
                     : 0;

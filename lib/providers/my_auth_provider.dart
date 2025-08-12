@@ -160,7 +160,7 @@ class MyAuthProvider extends ChangeNotifier {
           context,
           listen: false,
         );
-        chatProvider.initializeSharingIntent(context);
+        chatProvider.initializeSharingIntent();
         chatProvider.initIntentHandling();
         AppLoggerHelper.logInfo("Initializing app 50%");
 
