@@ -227,7 +227,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                     widget.chatMessage.metadata!.url!,
                     style: TextStyle(
                       color: AppStyles.links,
-                      fontSize: 12,
+                      fontSize: 15,
                       decoration: TextDecoration.underline,
                       decorationColor: AppStyles.links,
                       wordSpacing: 2.0,
@@ -237,8 +237,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                   Text(
                     widget.chatMessage.metadata!.text!,
                     style: TextStyle(
-                      color: AppStyles.smoke,
-                      fontSize: 12,
+                      color: isSender ? AppStyles.smoke : AppStyles.dark,
+                      fontSize: 15,
                       wordSpacing: 2.0,
                       height: 1.5,
                     ),
