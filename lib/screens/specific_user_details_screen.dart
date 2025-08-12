@@ -1,0 +1,248 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
+import 'package:skin_app_migration/constants/app_assets.dart';
+import 'package:skin_app_migration/constants/app_status.dart';
+import 'package:skin_app_migration/constants/app_styles.dart';
+import 'package:skin_app_migration/helpers/toast_helper.dart';
+import 'package:skin_app_migration/providers/super_admin_provider.dart';
+import 'package:skin_app_migration/widgets/k_background_scaffold.dart';
+import 'package:skin_app_migration/widgets/k_custom_button.dart';
+
+class SpecificUserDetailsScreen extends StatefulWidget {
+  const SpecificUserDetailsScreen({super.key, required this.email});
+
+  final String email;
+
+  @override
+  State<SpecificUserDetailsScreen> createState() =>
+      _SpecificUserDetailsScreenState();
+}
+
+class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
+  late Future<void> _loadUsers;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers = _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final adminProvider = Provider.of<SuperAdminProvider>(
+      context,
+      listen: false,
+    );
+    await adminProvider.getAllUsers(email: widget.email);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final adminProvider = Provider.of<SuperAdminProvider>(context);
+
+    return FutureBuilder<void>(
+      future: _loadUsers,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return KBackgroundScaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return KBackgroundScaffold(
+            body: Center(child: Text('Error loading user data')),
+          );
+        }
+
+        final userData = adminProvider.viewUsers;
+
+        return KBackgroundScaffold(
+          appBar: AppBar(),
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
+            child: Column(
+              spacing: 0.03.sh,
+              children: [
+                Center(
+                  child: (userData?.img == null || userData!.img!.isEmpty)
+                      ? SvgPicture.asset(
+                          AppAssets.profile,
+                          height: 0.2.sh,
+                          width: 0.2.sw,
+                        )
+                      : ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: userData.img ?? "",
+                            height: 0.20.sh,
+                            width: 0.20.sh,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) =>
+                                SvgPicture.asset(
+                                  AppAssets.profile,
+                                  height: 0.2.sh,
+                                  width: 0.2.sw,
+                                ),
+                          ),
+                        ),
+                ),
+                Text(
+                  'User Details',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  elevation: 6,
+                  margin: EdgeInsets.symmetric(vertical: 10.h),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.r),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildDetailRow('Name', userData?.name),
+                        _buildDetailRow('Email', userData?.email),
+                        _buildDetailRow('Mobile No', userData?.mobileNumber),
+                        _buildDetailRow('DOB', userData?.dob),
+                      ],
+                    ),
+                  ),
+                ),
+                if (userData?.canPost == true)
+                  KCustomButton(
+                    isLoading: adminProvider.isAdminLoading,
+                    text: "Revoke Permission",
+                    onPressed: () async {
+                      final status = await adminProvider.makeAsAdmin(
+                        email: widget.email,
+                      );
+                      switch (status) {
+                        case AppStatus.kSuccess:
+                          return ToastHelper.showSuccessToast(
+                            context: context,
+                            message: "Permission revoked",
+                          );
+                        case AppStatus.kFailed:
+                          return ToastHelper.showErrorToast(
+                            context: context,
+                            message: "Failed to revoke",
+                          );
+                        default:
+                          return ToastHelper.showErrorToast(
+                            context: context,
+                            message: status,
+                          );
+                      }
+                    },
+                    color: Colors.orange,
+                    prefixWidget: Icon(Icons.remove_circle_outline),
+                  )
+                else if (userData?.role == AppStatus.kAdmin &&
+                    !(userData?.canPost ?? true))
+                  KCustomButton(
+                    isLoading: adminProvider.isAdminLoading,
+                    text: "Make as Admin",
+                    onPressed: () async {
+                      final status = await adminProvider.makeAsAdmin(
+                        email: widget.email,
+                      );
+                      switch (status) {
+                        case AppStatus.kSuccess:
+                          return ToastHelper.showSuccessToast(
+                            context: context,
+                            message: "User is now an Admin",
+                          );
+                        case AppStatus.kFailed:
+                          return ToastHelper.showErrorToast(
+                            context: context,
+                            message: "Failed",
+                          );
+                        default:
+                          return ToastHelper.showErrorToast(
+                            context: context,
+                            message: status,
+                          );
+                      }
+                    },
+                    color: AppStyles.green,
+                    prefixWidget: Icon(Icons.person),
+                  ),
+                KCustomButton(
+                  isLoading: adminProvider.isBlockLoading,
+                  text: userData?.isBlocked == true
+                      ? "Unblock User"
+                      : "Block User",
+                  onPressed: () async {
+                    final result = await adminProvider.blockUsers(
+                      uid: userData!.uid,
+                      doBlock: !(userData.isBlocked),
+                    );
+                    // print(userData.isBlocked);
+                    switch (result) {
+                      case AppStatus.kSuccess:
+                        return ToastHelper.showSuccessToast(
+                          context: context,
+                          message: (userData.isBlocked)
+                              ? "User is Unblocked"
+                              : "User is Blocked",
+                        );
+                      case AppStatus.kFailed:
+                        return ToastHelper.showErrorToast(
+                          context: context,
+                          message: "Failed to update block status",
+                        );
+                      default:
+                        return ToastHelper.showErrorToast(
+                          context: context,
+                          message: result,
+                        );
+                    }
+                  },
+                  color: userData?.isBlocked == true
+                      ? Colors.green[900]
+                      : AppStyles.danger,
+                  prefixWidget: Icon(
+                    userData?.isBlocked == true
+                        ? Icons.lock_open
+                        : Icons.block_flipped,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String? value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$label: ",
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: AppStyles.bodyText,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: TextStyle(
+                fontSize: AppStyles.bodyText,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

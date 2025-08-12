@@ -35,7 +35,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="skin_app_migration"
+        android:label="S.K.I.N App"
         android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true">
 
