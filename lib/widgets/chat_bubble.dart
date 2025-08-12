@@ -23,7 +23,7 @@ class ChatBubble extends StatefulWidget {
 }
 
 class _ChatBubbleState extends State<ChatBubble> {
-  Metadata? metadata;
+  Metadata? previewData;
   String? avatar;
 
   @override
@@ -46,9 +46,9 @@ class _ChatBubbleState extends State<ChatBubble> {
       MetadataFetch.extract(widget.chatMessage.metadata!.url!).then((value) {
         if (mounted && value != null) {
           setState(() {
-            metadata = value;
+            previewData = value;
           });
-          print(metadata);
+          print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$previewData");
         }
       });
     }
@@ -173,36 +173,36 @@ class _ChatBubbleState extends State<ChatBubble> {
         ],
       );
     } else if (isUrl &&
-        metadata != null &&
+        previewData != null &&
         widget.chatMessage.metadata!.text != null) {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (metadata!.image != null)
+          if (previewData!.image != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                metadata!.image!,
+              child: CachedNetworkImage(
+                imageUrl: previewData!.image!,
                 height: 0.6.sw,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
           const SizedBox(height: 6),
-          if (metadata!.title != null)
+          if (previewData!.title != null)
             Text(
-              metadata!.title!,
+              previewData!.title!,
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
-          if (metadata!.description != null)
+          if (previewData!.description != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                metadata!.description!,
+                previewData!.description!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: textColor.withOpacity(0.8)),
@@ -239,6 +239,71 @@ class _ChatBubbleState extends State<ChatBubble> {
                     style: TextStyle(
                       color: isSender ? AppStyles.smoke : AppStyles.dark,
                       fontSize: 15,
+                      wordSpacing: 2.0,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (isUrl && previewData != null) {
+      content = Column(
+        children: [
+          if (previewData!.image != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: previewData!.image!,
+                height: 0.6.sw,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          const SizedBox(height: 6),
+          if (previewData!.title != null)
+            Text(
+              previewData!.title!,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          if (previewData!.description != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                previewData!.description!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: textColor.withOpacity(0.8)),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: GestureDetector(
+              onTap: () async {
+                final url = Uri.parse(widget.chatMessage.metadata!.url!);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  debugPrint("Cannot launch URL");
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 0.02.sh,
+                children: [
+                  Text(
+                    widget.chatMessage.metadata!.url!,
+                    style: TextStyle(
+                      color: AppStyles.links,
+                      fontSize: 15,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppStyles.links,
                       wordSpacing: 2.0,
                       height: 1.5,
                     ),
