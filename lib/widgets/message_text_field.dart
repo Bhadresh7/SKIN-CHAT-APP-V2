@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:metadata_fetch/metadata_fetch.dart';
 import 'package:provider/provider.dart';
 import 'package:skin_app_migration/app_router.dart';
 import 'package:skin_app_migration/constants/app_status.dart';
 import 'package:skin_app_migration/constants/app_styles.dart';
+import 'package:skin_app_migration/helpers/app_logger.dart';
 import 'package:skin_app_migration/models/chat_message_model.dart';
 import 'package:skin_app_migration/models/meta_model.dart';
+// import 'package:skin_app_migration/models/meta_model.dart';
 import 'package:skin_app_migration/providers/chat_provider.dart';
 import 'package:skin_app_migration/providers/provider_extensions.dart';
 import 'package:skin_app_migration/screens/image_preview_screen.dart';
@@ -22,6 +25,7 @@ class MessageTextField extends StatefulWidget {
 class _MessageTextFieldState extends State<MessageTextField> {
   // late NotificationService service;
   int? maxLines;
+  MetaModel? metaModel;
 
   @override
   void initState() {
@@ -50,6 +54,30 @@ class _MessageTextFieldState extends State<MessageTextField> {
     return match?.group(0);
   }
 
+  Future<void> fetchMetaData(String url) async {
+    try {
+      final metadata = await MetadataFetch.extract(url);
+
+      if (metadata != null) {
+        // AppLoggerHelper.logResponse('Fetched metadata: $metadata');
+
+        metaModel = MetaModel(
+          title: metadata.title ?? '',
+          description: metadata.description ?? '',
+          image: metadata.image ?? '',
+        );
+
+        // AppLoggerHelper.logResponse('Converted to MetaModel: $metaModel');
+      } else {
+        metaModel = null;
+        // AppLoggerHelper.logError('No metadata found for $url');
+      }
+    } catch (e) {
+      metaModel = null;
+      AppLoggerHelper.logError(e.toString());
+    }
+  }
+
   void _sendMessage() async {
     final messageText = widget.messageController.text.trim();
     if (messageText.isEmpty) return;
@@ -59,20 +87,35 @@ class _MessageTextFieldState extends State<MessageTextField> {
       final extractedUrl = extractFirstUrl(messageText);
       final hasUrl = extractedUrl != null && extractedUrl.isNotEmpty;
 
-      // Extract remaining text after removing the URL
-      String? remainingText;
+      AppLoggerHelper.logInfo("has url $hasUrl");
       if (hasUrl) {
-        remainingText = messageText.replaceFirst(extractedUrl, '').trim();
-        if (remainingText.isEmpty) remainingText = null;
+        await fetchMetaData(extractedUrl);
       } else {
-        remainingText = messageText;
+        metaModel = null;
       }
+      // AppLoggerHelper.logInfo(
+      //   "$extractedUrl and $hasUrl and messageText $messageText",
+      // );
+
+      // // Extract remaining text after removing the URL
+      // String? remainingText;
+      // if (hasUrl) {
+      //   remainingText = messageText.replaceFirst(extractedUrl, '').trim();
+      //   if (remainingText.isEmpty) remainingText = null;
+      // } else {
+      //   remainingText = messageText;
+      // }
+
+      AppLoggerHelper.logInfo(
+        "---------------------------------------------------",
+      );
+      AppLoggerHelper.logResponse("metamodel $metaModel ");
+      AppLoggerHelper.logInfo(
+        "---------------------------------------------------",
+      );
 
       final rawMessage = ChatMessageModel(
-        metadata: MetaModel(
-          text: remainingText,
-          url: hasUrl ? extractedUrl : null,
-        ),
+        text: messageText,
         senderId: context.readAuthProvider.user?.uid ?? 'unknown',
         createdAt: DateTime.now().millisecondsSinceEpoch,
         name:
@@ -80,6 +123,8 @@ class _MessageTextFieldState extends State<MessageTextField> {
             context.readAuthProvider.user?.displayName ??
             'Unknown',
         messageId: '',
+        imageUrl: "",
+        metadata: metaModel,
       );
 
       widget.messageController.clear();

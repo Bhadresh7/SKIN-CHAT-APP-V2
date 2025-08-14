@@ -137,7 +137,6 @@ class MyAuthProvider extends ChangeNotifier {
           user = FirebaseAuth.instance.currentUser;
           if (!(user!.emailVerified)) {
             AppLoggerHelper.logInfo("Initializing app 100%");
-
             AppRouter.replace(context, EmailVerificationScreen());
           } else {
             // Email was verified, continue to next step

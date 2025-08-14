@@ -67,7 +67,7 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                 Center(
                   child: (userData?.img == null || userData!.img!.isEmpty)
                       ? SvgPicture.asset(
-                          AppAssets.profile,
+                          AppAssets.userIcon,
                           height: 0.2.sh,
                           width: 0.2.sw,
                         )
@@ -79,7 +79,7 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) =>
                                 SvgPicture.asset(
-                                  AppAssets.profile,
+                                  AppAssets.userIcon,
                                   height: 0.2.sh,
                                   width: 0.2.sw,
                                 ),
@@ -90,14 +90,15 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
                   'User Details',
                   style: TextStyle(
                     fontSize: 22.sp,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xffa68ee7),
                   ),
                 ),
                 Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
-                  elevation: 6,
+                  elevation: 2,
                   margin: EdgeInsets.symmetric(vertical: 10.h),
                   child: Padding(
                     padding: EdgeInsets.all(16.r),
@@ -228,16 +229,18 @@ class _SpecificUserDetailsScreenState extends State<SpecificUserDetailsScreen> {
           Text(
             "$label: ",
             style: TextStyle(
+              color: Color(0xff9271f1),
               fontWeight: FontWeight.w600,
-              fontSize: AppStyles.bodyText,
+              fontSize: 14,
             ),
           ),
           Expanded(
             child: Text(
               value ?? 'N/A',
               style: TextStyle(
+                letterSpacing: 1.5,
                 fontSize: AppStyles.bodyText,
-                color: Colors.grey[700],
+                color: Color(0xff734FDB),
               ),
             ),
           ),

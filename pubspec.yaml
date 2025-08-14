@@ -50,6 +50,8 @@ dependencies:
 
   #url launcher
   url_launcher: ^6.3.2
+  #  linkify for clickable links and select copy
+  flutter_linkify: ^6.0.0
 
   #date package
   intl: ^0.20.2

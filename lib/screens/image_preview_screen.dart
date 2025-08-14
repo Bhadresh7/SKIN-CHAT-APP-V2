@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:skin_app_migration/app_router.dart';
 import 'package:skin_app_migration/constants/app_styles.dart';
 import 'package:skin_app_migration/models/chat_message_model.dart';
-import 'package:skin_app_migration/models/meta_model.dart';
+// import 'package:skin_app_migration/models/meta_model.dart';
 import 'package:skin_app_migration/providers/provider_extensions.dart';
 
 class ImagePreviewScreen extends StatefulWidget {
@@ -144,13 +144,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                                   .add(
                                     ChatMessageModel(
                                       messageId: '',
-                                      metadata: MetaModel(
-                                        img: downloadUrl,
-                                        text: textController.text,
-                                        url: extractFirstUrl(
-                                          textController.text.trim(),
-                                        ),
-                                      ),
+                                      text: textController.text,
+                                      imageUrl: downloadUrl,
                                       senderId:
                                           context.readAuthProvider.user!.uid,
                                       createdAt:
@@ -165,6 +160,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                                               .user!
                                               .displayName ??
                                           "UnKnown",
+                                      metadata: null,
                                     ).toJson(),
                                   );
 
@@ -181,15 +177,5 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         ),
       ),
     );
-  }
-
-  String? extractFirstUrl(String text) {
-    final urlRegex = RegExp(
-      r'(?:(?:https?|ftp)://)?(?:[\w-]+\.)+[a-z]{2,}(?:/\S*)?',
-      caseSensitive: false,
-    );
-
-    final match = urlRegex.firstMatch(text);
-    return match?.group(0);
   }
 }

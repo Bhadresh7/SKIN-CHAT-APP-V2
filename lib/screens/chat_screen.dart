@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:skin_app_migration/constants/app_assets.dart';
 import 'package:skin_app_migration/constants/app_styles.dart';
+import 'package:skin_app_migration/helpers/app_logger.dart';
 import 'package:skin_app_migration/models/chat_message_model.dart';
 import 'package:skin_app_migration/providers/chat_provider.dart';
 import 'package:skin_app_migration/providers/provider_extensions.dart';
@@ -311,6 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return ListView.builder(
       controller: _scrollController,
       reverse: true, // Show newest messages at the bottom
+      cacheExtent: 50,
       itemCount: _messages.length + (_hasMoreMessages ? 1 : 0),
       itemBuilder: (context, index) {
         // Show loading indicator at the top when loading more
@@ -325,6 +327,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
         // Show message
         final message = _messages[index];
+        AppLoggerHelper.logResponse("Hello ${message.toJson()}");
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
           child: ChatBubble(chatMessage: message),

@@ -65,6 +65,8 @@ class LocalDBService {
       senderId TEXT,
       name TEXT,
       ts INTEGER,
+      text TEXT,
+      imageUrl TEXT,
       metadata TEXT
     )
   ''');
@@ -90,6 +92,8 @@ class LocalDBService {
       'senderId': message.senderId,
       'name': message.name,
       'ts': message.createdAt,
+      'text': message.text,
+      'imageUrl': message.imageUrl,
       'metadata': jsonEncode(message.metadata?.toJson()),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
     AppLoggerHelper.logInfo('Inserted message: ${message.toJson()}');
@@ -107,6 +111,8 @@ class LocalDBService {
         senderId: map['senderId'] as String? ?? '',
         name: map['name'] as String? ?? '',
         createdAt: map['ts'] as int? ?? 0,
+        imageUrl: map['imageUrl'] as String? ?? '',
+        text: map['text'] as String? ?? '',
         metadata: metadataJson != null
             ? MetaModel.fromJson(jsonDecode(metadataJson))
             : null,

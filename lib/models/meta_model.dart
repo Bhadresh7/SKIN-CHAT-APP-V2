@@ -1,19 +1,19 @@
 class MetaModel {
-  final String? text;
-  final String? url;
-  final String? img;
+  final String? title;
+  final String? description;
+  final String? image;
 
-  MetaModel({this.text, this.url, this.img});
+  MetaModel({this.title, this.description, this.image});
 
   factory MetaModel.fromJson(Map<String, dynamic> json) {
     return MetaModel(
-      text: json['text']?.toString(),
-      url: json['url']?.toString(),
-      img: json['img']?.toString(),
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      image: json['image'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'text': text, 'url': url, 'img': img};
+    return {'title': title, 'description': description, 'img': description};
   }
 }

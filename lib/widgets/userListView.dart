@@ -191,7 +191,7 @@ class _UserListViewState extends State<UserListView> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
-            elevation: 2.4,
+            elevation: 1.4,
             color: Color(0xFFF5F2FD),
             child: InkWell(
               onTap: () => _showOptionsSheet(

@@ -306,7 +306,7 @@ class ChatProvider extends ChangeNotifier {
       AppLoggerHelper.logWarning(message.toJson().toString());
       notifyListeners();
 
-      AppLoggerHelper.logInfo('New message added: ${message.metadata?.text}');
+      AppLoggerHelper.logInfo('New message added: ${message.text}');
     } catch (e) {
       AppLoggerHelper.logError('Failed to insert message: $e');
     }
@@ -318,10 +318,11 @@ class ChatProvider extends ChangeNotifier {
     String docId,
   ) {
     try {
+      AppLoggerHelper.logInfo("this is the data $data");
       // Validate required fields and provide defaults for null values
       final messageData = <String, dynamic>{
         'id': data['id'] ?? docId,
-        'senderId': data['senderId'],
+        'senderId': data['id'],
         'createdAt':
             data['createdAt'] ??
             data['ts'] ??
@@ -331,7 +332,13 @@ class ChatProvider extends ChangeNotifier {
             data['ts'] ??
             DateTime.now().millisecondsSinceEpoch,
         'name': data['name'] ?? 'Unknown User',
-        'metadata': data['metadata'] ?? {},
+        'text': data['text'] ?? '',
+        'imageUrl': data['imageUrl'] ?? '',
+        'metadata':
+            (data['metadata'] as Map?)?.map(
+              (key, value) => MapEntry(key.toString(), value),
+            ) ??
+            {},
       };
 
       // Add any other fields that exist in the original data
@@ -369,11 +376,11 @@ class ChatProvider extends ChangeNotifier {
                 );
 
                 final localMessages = await localDBService.getAllMessages();
-
+                AppLoggerHelper.logInfo("1 $localMessages");
                 final lastLocalTimestamp = localMessages.isNotEmpty
                     ? localMessages.map((m) => m.createdAt).reduce(max)
                     : 0;
-
+                AppLoggerHelper.logInfo("2 $lastLocalTimestamp");
                 AppLoggerHelper.logInfo(
                   'Last local timestamp: $lastLocalTimestamp',
                 );
@@ -384,6 +391,7 @@ class ChatProvider extends ChangeNotifier {
                 for (var doc in snapshot.docs) {
                   try {
                     final data = doc.data() as Map<String, dynamic>;
+                    AppLoggerHelper.logInfo("data from fsdb $data");
                     final remoteMessage = _createMessageFromFirestoreData(
                       data,
                       doc.id,
@@ -596,20 +604,24 @@ class ChatProvider extends ChangeNotifier {
   // Method to add message and sync with Firestore
   Future<void> sendMessage(ChatMessageModel message) async {
     try {
-      AppLoggerHelper.logInfo('Sending message: ${message.metadata?.text}');
+      AppLoggerHelper.logInfo('Sending message: ${message.text}');
 
-      if (message.metadata == null) return;
+      // if (message.metadata == null) return;
 
       // 1. Add to Firestore and get the doc reference
       final docRef = await FirebaseFirestore.instance
           .collection('chats')
           .add(message.toJson());
 
+      AppLoggerHelper.logInfo('$docRef');
+
       final messageWithId = ChatMessageModel(
         messageId: docRef.id,
         senderId: message.senderId,
         createdAt: message.createdAt,
         name: message.name,
+        imageUrl: message.imageUrl,
+        text: message.text,
         metadata: message.metadata,
       );
 
